@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>未来の里山マップ</title>
+
+
+    <!-- Leaflet -->
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+
+    <!-- 360度ビューア -->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+
+
+    <!-- CSS -->
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- ========================================
+         ヘッダー
+    ======================================== -->
+
+    <header class="header">
+
+        <div class="header-title">
+
+            <div class="header-icon">
+                🌳
+            </div>
+
+            <div>
+
+                <h1>
+                    未来の里山マップ
+                </h1>
+
+                <p>
+                    福富の里山を見つけて、未来を考えよう
+                </p>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- ========================================
+         説明
+    ======================================== -->
+
+    <section class="intro">
+
+        <div class="intro-step">
+
+            <div class="step-number">
+                1
+            </div>
+
+            <div>
+
+                <strong>
+                    里山を見つけよう
+                </strong>
+
+                <p>
+                    地図をクリックして、
+                    撮影した場所を登録します。
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="intro-arrow">
+            →
+        </div>
+
+
+        <div class="intro-step">
+
+            <div class="step-number">
+                2
+            </div>
+
+            <div>
+
+                <strong>
+                    データを見てみよう
+                </strong>
+
+                <p>
+                    標高・傾斜・気温などを確認します。
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="intro-arrow">
+            →
+        </div>
+
+
+        <div class="intro-step">
+
+            <div class="step-number">
+                3
+            </div>
+
+            <div>
+
+                <strong>
+                    未来を考えよう
+                </strong>
+
+                <p>
+                    データをもとに理想の里山を考えます。
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ========================================
+         地図
+    ======================================== -->
+
+    <main class="map-area">
+
+
+        <div class="map-title">
+
+            <div>
+
+                <h2>
+                    🗺️ 里山マップ
+                </h2>
+
+                <p>
+                    地図をクリックすると、新しい場所を登録できます。
+                </p>
+
+            </div>
+
+
+            <div class="map-controls">
+
+                <button id="distanceButton" class="distance-button">
+                    📏 距離を測る
+                </button>
+
+                <button id="cancelDistanceButton" class="cancel-distance-button" style="display:none;">
+                    ✕ 測定を終了
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- 距離表示 -->
+
+        <div id="distancePanel" class="distance-panel" style="display:none;">
+
+            <strong>
+                📏 距離を測っています
+            </strong>
+
+            <p>
+                地図上をクリックして地点を追加してください。
+            </p>
+
+            <div id="distanceResult">
+                0 m
+            </div>
+
+        </div>
+
+
+
+        <div id="map"></div>
+
+
+        <div class="map-source">
+            地図データ：Esri、TomTom、Garmin、FAO、NOAA、USGS、
+            OpenStreetMap contributors、GIS User Community
+            <br>
+            標高：国土地理院
+        </div>
+
+
+    </main>
+
+
+
+    <!-- ========================================
+         場所情報モーダル
+    ======================================== -->
+
+    <div id="placeModal" class="modal">
+
+        <div class="modal-content">
+
+
+            <button id="closePlaceModal" class="close-button">
+                ×
+            </button>
+
+
+
+            <!-- ヘッダー -->
+
+            <div class="modal-header">
+
+                <div class="modal-icon">
+                    📍
+                </div>
+
+                <div>
+
+                    <h2>
+                        この場所の里山
+                    </h2>
+
+                    <p>
+                        現在の様子とデータを確認しよう
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ========================================
+                 データ
+            ======================================== -->
+
+            <section class="data-section">
+
+
+                <div class="section-title">
+
+                    <span class="section-icon">
+                        📊
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            この場所のデータ
+                        </h3>
+
+                        <p>
+                            地図上の位置から取得したデータです。
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div id="dataLoading" class="data-loading">
+
+                    データを取得しています……
+
+                </div>
+
+
+
+                <div id="dataCards" class="data-cards" style="display:none;">
+
+
+                    <div class="data-card">
+
+                        <div class="data-card-icon">
+                            ⛰️
+                        </div>
+
+                        <div>
+
+                            <div class="data-card-label">
+                                標高
+                            </div>
+
+                            <div id="elevationValue" class="data-card-value">
+                                ---
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="data-card">
+
+                        <div class="data-card-icon">
+                            📐
+                        </div>
+
+                        <div>
+
+                            <div class="data-card-label">
+                                傾斜
+                            </div>
+
+                            <div id="slopeValue" class="data-card-value">
+                                ---
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="data-card">
+
+                        <div class="data-card-icon">
+                            🌡️
+                        </div>
+
+                        <div>
+
+                            <div class="data-card-label">
+                                現在の気温
+                            </div>
+
+                            <div id="temperatureValue" class="data-card-value">
+                                ---
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <p class="data-note">
+
+                    ※ 標高・傾斜は国土地理院の標高データを利用しています。
+                    気温は気象モデルによる推定値です。
+
+                </p>
+
+
+            </section>
+
+
+
+            <!-- ========================================
+                 現実
+            ======================================== -->
+
+            <section class="photo-section reality-section">
+
+
+                <div class="section-title">
+
+                    <span class="section-icon">
+                        📷
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            現実の里山
+                        </h3>
+
+                        <p>
+                            実際に撮影した写真
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div id="realityImageArea" class="photo-area">
+
+                    <div class="no-photo">
+
+                        <div class="no-photo-icon">
+                            📷
+                        </div>
+
+                        <p>
+                            まだ写真が登録されていません。
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <button id="view360Button" class="view-360-button" style="display:none;">
+
+                    🌐 360度で見る
+
+                </button>
+
+
+
+                <label class="upload-button reality-button">
+
+                    📷 現実の写真を登録
+
+                    <input id="realityImageInput" type="file" accept="image/*">
+
+                </label>
+
+
+
+                <label class="checkbox-label">
+
+                    <input id="reality360Checkbox" type="checkbox">
+
+                    この写真は360度写真です
+
+                </label>
+
+
+
+                <p class="small-note">
+
+                    ※ RICOH THETAなどで撮影した360度写真の場合は
+                    チェックしてください。
+
+                </p>
+
+
+            </section>
+
+
+
+            <!-- ========================================
+                 理想
+            ======================================== -->
+
+            <section class="photo-section future-section">
+
+
+                <div class="section-title">
+
+                    <span class="section-icon">
+                        🌱
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            理想の里山
+                        </h3>
+
+                        <p>
+                            未来にこんな場所にしたい、という写真
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div id="futureImageArea" class="photo-area">
+
+                    <div class="no-photo">
+
+                        <div class="no-photo-icon">
+                            🌱
+                        </div>
+
+                        <p>
+                            まだ理想の写真が登録されていません。
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- 理想の360度表示ボタン -->
+
+                <button id="viewFuture360Button" class="view-360-button" style="display:none;">
+
+                    🌐 理想の里山を360度で見る
+
+                </button>
+
+
+
+                <!-- 理想の写真登録 -->
+
+                <label class="upload-button future-button">
+
+                    🌱 理想の写真を登録
+
+                    <input id="futureImageInput" type="file" accept="image/*">
+
+                </label>
+
+
+
+                <!-- 理想の360度設定 -->
+
+                <label class="checkbox-label">
+
+                    <input id="future360Checkbox" type="checkbox">
+
+                    この写真は360度写真です
+
+                </label>
+
+
+
+                <p class="small-note">
+
+                    ※ 360度写真の場合はチェックしてください。
+
+                </p>
+
+
+
+                <!-- コメント -->
+
+                <div class="comment-area">
+
+                    <label for="futureComment">
+
+                        💭
+                        この場所をどうしたい？
+                        なぜそうしたい？
+
+                    </label>
+
+
+                    <textarea id="futureComment" placeholder="例：ここにベンチを置いて、地域の人が休憩できる場所にしたいです。"></textarea>
+
+
+                    <button id="saveCommentButton" class="save-comment-button">
+
+                        💾 解説を保存
+
+                    </button>
+
+                </div>
+
+
+
+                <div id="savedCommentArea" class="saved-comment" style="display:none;">
+
+                    <div class="saved-comment-title">
+                        💭 この場所について
+                    </div>
+
+                    <div id="savedCommentText"></div>
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- ========================================
+                 ピン削除
+            ======================================== -->
+
+            <button id="deleteMarkerButton" class="delete-marker-button" type="button">
+
+                🗑️ このピンを削除
+
+            </button>
+
+
+
+            <!-- 閉じる -->
+
+            <button id="closePlaceButton" class="main-close-button">
+
+                閉じる
+
+            </button>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ========================================
+         360度ビューア
+    ======================================== -->
+
+    <div id="viewer360Modal" class="viewer-modal">
+
+        <div class="viewer-header">
+
+            <strong>
+                🌐 360度写真
+            </strong>
+
+            <button id="close360Button" class="viewer-close">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <div id="panorama" class="panorama"></div>
+
+
+        <div class="viewer-help">
+
+            🖱️ ドラッグして周囲を見回せます　
+            🔍 マウスホイールで拡大・縮小できます
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Leaflet -->
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+    <!-- Pannellum -->
+
+    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+
+
+    <!-- JavaScript -->
+
+    <script src="script.js"></script>
+
+
+</body>
+
+</html>
